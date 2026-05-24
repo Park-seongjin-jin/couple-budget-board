@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>성진 & 소원 머니보드</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Shared Monthly Finance</p>
+          <h1>성진 & 소원 머니보드</h1>
+        </div>
+        <div class="month-picker">
+          <button id="prevMonth" type="button" title="이전 달">‹</button>
+          <input id="monthInput" type="month" />
+          <button id="nextMonth" type="button" title="다음 달">›</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="summary-strip" aria-label="월간 요약">
+          <article>
+            <span>월급 합계</span>
+            <strong id="totalIncome">0원</strong>
+          </article>
+          <article>
+            <span>지출(생활비+VOO+주식)</span>
+            <strong id="totalExpense">0원</strong>
+          </article>
+          <article>
+            <span>적금</span>
+            <strong id="totalSavings">0원</strong>
+          </article>
+          <article>
+            <span>VOO 투자</span>
+            <strong id="totalVoo">0원</strong>
+          </article>
+          <article>
+            <span>주식투자</span>
+            <strong id="totalStock">0원</strong>
+          </article>
+          <article>
+            <span>남는 돈</span>
+            <strong id="totalBalance">0원</strong>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <form id="entryForm" class="panel">
+            <div class="panel-heading">
+              <h2>이번 달 기록</h2>
+              <p>각자 월급, 생활비, 적금, VOO, 주식투자를 입력해요.</p>
+            </div>
+
+            <label>
+              사람
+              <select id="personInput">
+                <option value="성진">성진</option>
+                <option value="소원">소원</option>
+              </select>
+            </label>
+
+            <div class="input-grid">
+              <label>
+                월급
+                <input id="incomeInput" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
+              </label>
+              <label>
+                생활비
+                <input id="expenseInput" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
+              </label>
+              <label>
+                적금
+                <input id="savingsInput" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
+              </label>
+              <label>
+                VOO
+                <input id="vooInput" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
+              </label>
+              <label>
+                주식투자
+                <input id="stockInput" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
+              </label>
+            </div>
+
+            <label>
+              메모
+              <textarea id="memoInput" rows="3" placeholder="예: 이번 달 고정비가 늘었음, 여행비 따로 계산"></textarea>
+            </label>
+
+            <button class="primary" type="submit">기록 저장</button>
+          </form>
+
+          <section class="panel report-panel">
+            <div class="panel-heading">
+              <h2>월간 리포트</h2>
+              <p id="reportMonth">-</p>
+            </div>
+            <div id="personReports" class="person-reports"></div>
+          </section>
+        </section>
+
+        <section class="workspace">
+          <section class="panel wide">
+            <div class="panel-heading">
+              <h2>월별 흐름</h2>
+              <p>저장된 달을 비교해요.</p>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>월</th>
+                    <th>월급</th>
+                    <th>지출(생활비+VOO+주식)</th>
+                    <th>저축+투자</th>
+                    <th>남는 돈</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>공유 데이터</h2>
+              <p>파일로 백업하거나 다른 브라우저에 옮길 수 있어요.</p>
+            </div>
+            <div class="button-row">
+              <button id="exportBtn" type="button">내보내기</button>
+              <label class="file-button">
+                가져오기
+                <input id="importInput" type="file" accept="application/json" />
+              </label>
+            </div>
+            <p class="note">Supabase 설정을 넣고 배포하면 둘이 같은 데이터를 봅니다.</p>
+          </section>
+        </section>
+
+        <section class="panel article-board">
+          <div class="panel-heading">
+            <h2>읽은 기사 / 게시물</h2>
+            <p>돈, 투자, 생활 관련 글을 남기고 서로 댓글을 달아요.</p>
+          </div>
+          <form id="postForm" class="post-form">
+            <input id="postTitleInput" type="text" placeholder="게시물 제목" required />
+            <input id="postUrlInput" type="url" placeholder="기사 링크 https://..." />
+            <textarea id="postBodyInput" rows="3" placeholder="읽고 든 생각, 같이 이야기할 포인트"></textarea>
+            <button class="primary" type="submit">게시물 추가</button>
+          </form>
+          <div id="postList" class="post-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="commentTemplate">
+      <form class="comment-form">
+        <select name="author">
+          <option value="성진">성진</option>
+          <option value="소원">소원</option>
+        </select>
+        <input name="text" type="text" placeholder="댓글 쓰기" required />
+        <button type="submit">등록</button>
+      </form>
+    </template>
+
+    <script src="./supabase-config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
