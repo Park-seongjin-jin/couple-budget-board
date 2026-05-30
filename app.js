@@ -20,7 +20,6 @@ const els = {
   totalSavings: document.querySelector("#totalSavings"),
   totalVoo: document.querySelector("#totalVoo"),
   totalStock: document.querySelector("#totalStock"),
-  totalSeed: document.querySelector("#totalSeed"),
   totalBalance: document.querySelector("#totalBalance"),
   reportMonth: document.querySelector("#reportMonth"),
   personReports: document.querySelector("#personReports"),
@@ -131,7 +130,6 @@ function render() {
   els.totalSavings.textContent = won(totals.savings);
   els.totalVoo.textContent = won(totals.voo);
   els.totalStock.textContent = won(totals.stock);
-  els.totalSeed.textContent = won(totals.seed);
   els.totalBalance.textContent = won(totals.balance);
   els.reportMonth.textContent = monthLabel(month);
 
