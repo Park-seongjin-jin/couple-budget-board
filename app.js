@@ -14,18 +14,13 @@ const els = {
   prevMonth: document.querySelector("#prevMonth"),
   nextMonth: document.querySelector("#nextMonth"),
   entryForm: document.querySelector("#entryForm"),
-  personInput: document.querySelector("#personInput"),
-  incomeInput: document.querySelector("#incomeInput"),
-  expenseInput: document.querySelector("#expenseInput"),
-  savingsInput: document.querySelector("#savingsInput"),
-  vooInput: document.querySelector("#vooInput"),
-  stockInput: document.querySelector("#stockInput"),
-  memoInput: document.querySelector("#memoInput"),
-  totalIncome: document.querySelector("#totalIncome"),
+  seongjinIncome: document.querySelector("#seongjinIncome"),
+  sowonIncome: document.querySelector("#sowonIncome"),
   totalExpense: document.querySelector("#totalExpense"),
   totalSavings: document.querySelector("#totalSavings"),
   totalVoo: document.querySelector("#totalVoo"),
   totalStock: document.querySelector("#totalStock"),
+  totalSeed: document.querySelector("#totalSeed"),
   totalBalance: document.querySelector("#totalBalance"),
   reportMonth: document.querySelector("#reportMonth"),
   personReports: document.querySelector("#personReports"),
@@ -44,28 +39,21 @@ init();
 
 els.monthInput.addEventListener("change", () => {
   ensureMonth(els.monthInput.value);
-  fillFormForPerson();
+  fillFormForPeople();
   render();
 });
 
 els.prevMonth.addEventListener("click", () => shiftMonth(-1));
 els.nextMonth.addEventListener("click", () => shiftMonth(1));
-els.personInput.addEventListener("change", fillFormForPerson);
 
 els.entryForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const month = els.monthInput.value;
-  const person = els.personInput.value;
 
   ensureMonth(month);
-  state.months[month][person] = {
-    income: numberFrom(els.incomeInput),
-    expense: numberFrom(els.expenseInput),
-    savings: numberFrom(els.savingsInput),
-    voo: numberFrom(els.vooInput),
-    stock: numberFrom(els.stockInput),
-    memo: els.memoInput.value.trim(),
-  };
+  PEOPLE.forEach((person) => {
+    state.months[month][person] = readPersonInputs(person);
+  });
 
   await persist();
   render();
@@ -94,7 +82,7 @@ els.importInput.addEventListener("change", async (event) => {
     state.posts = imported.posts;
     await persist();
     ensureMonth(els.monthInput.value);
-    fillFormForPerson();
+    fillFormForPeople();
     render();
   } catch (error) {
     alert(error.message || "가져오기에 실패했습니다.");
@@ -128,7 +116,7 @@ async function init() {
 
   els.monthInput.value = currentMonthKey();
   ensureMonth(els.monthInput.value);
-  fillFormForPerson();
+  fillFormForPeople();
   render();
 }
 
@@ -137,11 +125,13 @@ function render() {
   const rows = PEOPLE.map((person) => state.months[month][person]);
   const totals = sumRows(rows);
 
-  els.totalIncome.textContent = won(totals.income);
+  els.seongjinIncome.textContent = won(state.months[month]["성진"].income);
+  els.sowonIncome.textContent = won(state.months[month]["소원"].income);
   els.totalExpense.textContent = won(totals.expenseWithStock);
   els.totalSavings.textContent = won(totals.savings);
   els.totalVoo.textContent = won(totals.voo);
   els.totalStock.textContent = won(totals.stock);
+  els.totalSeed.textContent = won(totals.seed);
   els.totalBalance.textContent = won(totals.balance);
   els.reportMonth.textContent = monthLabel(month);
 
@@ -161,11 +151,13 @@ function renderPersonReports(month) {
       <article class="person-card">
         <h3>${person}</h3>
         <div class="metric"><span>월급</span><strong>${won(item.income)}</strong></div>
-        <div class="metric"><span>생활비</span><strong>${won(item.expense)}</strong></div>
+        <div class="metric"><span>고정비</span><strong>${won(item.expense)}</strong></div>
         <div class="metric"><span>적금</span><strong>${won(item.savings)}</strong></div>
         <div class="metric"><span>VOO</span><strong>${won(item.voo)}</strong></div>
         <div class="metric"><span>주식투자</span><strong>${won(item.stock)}</strong></div>
-        <div class="metric"><span>지출 합계(생활비+VOO+주식)</span><strong>${won(item.expense + item.voo + item.stock)}</strong></div>
+        <div class="metric"><span>주식 종목</span><strong>${escapeHtml(item.stockMemo) || "-"}</strong></div>
+        <div class="metric"><span>시드머니</span><strong>${won(item.seed)}</strong></div>
+        <div class="metric"><span>지출 합계(고정비+VOO+주식)</span><strong>${won(item.expense + item.voo + item.stock)}</strong></div>
         <div class="ratio-bar" title="저축+투자율"><span style="width: ${ratio}%"></span></div>
         <div class="metric"><span>저축+투자율</span><strong>${ratio}%</strong></div>
         <div class="metric"><span>남는 돈</span><strong>${won(balance)}</strong></div>
@@ -179,18 +171,21 @@ function renderHistory() {
   const months = Object.keys(state.months).sort().reverse();
 
   if (months.length === 0) {
-    els.historyTable.innerHTML = `<tr><td colspan="5" class="empty">저장된 기록이 없습니다.</td></tr>`;
+    els.historyTable.innerHTML = `<tr><td colspan="7" class="empty">저장된 기록이 없습니다.</td></tr>`;
     return;
   }
 
   els.historyTable.innerHTML = months.map((month) => {
+    ensureMonth(month);
     const totals = sumRows(PEOPLE.map((person) => state.months[month][person]));
     return `
       <tr>
         <td>${monthLabel(month)}</td>
-        <td>${won(totals.income)}</td>
+        <td>${won(state.months[month]["성진"].income)}</td>
+        <td>${won(state.months[month]["소원"].income)}</td>
         <td>${won(totals.expenseWithStock)}</td>
-        <td>${won(totals.savings + totals.voo)}</td>
+        <td>${won(totals.savings + totals.voo + totals.stock)}</td>
+        <td>${won(totals.seed)}</td>
         <td>${won(totals.balance)}</td>
       </tr>
     `;
@@ -235,14 +230,39 @@ function renderPosts() {
   });
 }
 
-function fillFormForPerson() {
-  const item = state.months[els.monthInput.value][els.personInput.value];
-  els.incomeInput.value = item.income || "";
-  els.expenseInput.value = item.expense || "";
-  els.savingsInput.value = item.savings || "";
-  els.vooInput.value = item.voo || "";
-  els.stockInput.value = item.stock || "";
-  els.memoInput.value = item.memo || "";
+function fillFormForPeople() {
+  PEOPLE.forEach((person) => {
+    const item = state.months[els.monthInput.value][person];
+    setPersonField(person, "income", item.income || "");
+    setPersonField(person, "expense", item.expense || "");
+    setPersonField(person, "savings", item.savings || "");
+    setPersonField(person, "voo", item.voo || "");
+    setPersonField(person, "stock", item.stock || "");
+    setPersonField(person, "seed", item.seed || "");
+    setPersonField(person, "stockMemo", item.stockMemo || "");
+    setPersonField(person, "memo", item.memo || "");
+  });
+}
+
+function readPersonInputs(person) {
+  return {
+    income: numberFrom(getPersonField(person, "income")),
+    expense: numberFrom(getPersonField(person, "expense")),
+    savings: numberFrom(getPersonField(person, "savings")),
+    voo: numberFrom(getPersonField(person, "voo")),
+    stock: numberFrom(getPersonField(person, "stock")),
+    seed: numberFrom(getPersonField(person, "seed")),
+    stockMemo: getPersonField(person, "stockMemo").value.trim(),
+    memo: getPersonField(person, "memo").value.trim(),
+  };
+}
+
+function getPersonField(person, field) {
+  return document.querySelector(`[data-person="${person}"][data-field="${field}"]`);
+}
+
+function setPersonField(person, field, value) {
+  getPersonField(person, field).value = value;
 }
 
 function shiftMonth(amount) {
@@ -250,7 +270,7 @@ function shiftMonth(amount) {
   const date = new Date(year, month - 1 + amount, 1);
   els.monthInput.value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
   ensureMonth(els.monthInput.value);
-  fillFormForPerson();
+  fillFormForPeople();
   render();
 }
 
@@ -267,10 +287,15 @@ function ensureMonth(month) {
         savings: 0,
         voo: 0,
         stock: 0,
+        seed: 0,
+        stockMemo: "",
         memo: "",
       };
-    } else if (typeof state.months[month][person].stock !== "number") {
-      state.months[month][person].stock = 0;
+    } else {
+      const item = state.months[month][person];
+      if (typeof item.stock !== "number") item.stock = 0;
+      if (typeof item.seed !== "number") item.seed = 0;
+      if (typeof item.stockMemo !== "string") item.stockMemo = "";
     }
   });
 }
@@ -282,7 +307,8 @@ function sumRows(rows) {
     savings: sum.savings + (item.savings || 0),
     voo: sum.voo + (item.voo || 0),
     stock: sum.stock + (item.stock || 0),
-  }), { income: 0, expense: 0, savings: 0, voo: 0, stock: 0 });
+    seed: sum.seed + (item.seed || 0),
+  }), { income: 0, expense: 0, savings: 0, voo: 0, stock: 0, seed: 0 });
 
   return {
     ...totals,
