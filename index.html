@@ -21,39 +21,8 @@
       </header>
 
       <main>
-        <section class="summary-strip" aria-label="월간 요약">
-          <article>
-            <span>성진 월급</span>
-            <strong id="seongjinIncome">0원</strong>
-          </article>
-          <article>
-            <span>소원 월급</span>
-            <strong id="sowonIncome">0원</strong>
-          </article>
-          <article>
-            <span>지출(고정비+VOO+주식)</span>
-            <strong id="totalExpense">0원</strong>
-          </article>
-          <article>
-            <span>적금</span>
-            <strong id="totalSavings">0원</strong>
-          </article>
-          <article>
-            <span>VOO 투자</span>
-            <strong id="totalVoo">0원</strong>
-          </article>
-          <article>
-            <span>주식투자</span>
-            <strong id="totalStock">0원</strong>
-          </article>
-          <article>
-            <span>남는 돈</span>
-            <strong id="totalBalance">0원</strong>
-          </article>
-        </section>
-
-        <section class="workspace">
-          <form id="entryForm" class="panel">
+        <section class="workspace entry-workspace">
+          <form id="entryForm" class="panel entry-panel">
             <div class="panel-heading">
               <h2>이번 달 기록</h2>
               <p>성진과 소원의 월급, 고정비, 적금, 투자, 시드머니를 한 번에 입력해요.</p>
@@ -146,6 +115,13 @@
               <p id="reportMonth">-</p>
             </div>
             <div id="personReports" class="person-reports"></div>
+            <section class="stock-board">
+              <div class="stock-board-heading">
+                <h3>이번 달 종목 투자</h3>
+                <span id="stockListCount">0개</span>
+              </div>
+              <div id="stockList" class="stock-list"></div>
+            </section>
           </section>
         </section>
 
