@@ -14,15 +14,10 @@ const els = {
   prevMonth: document.querySelector("#prevMonth"),
   nextMonth: document.querySelector("#nextMonth"),
   entryForm: document.querySelector("#entryForm"),
-  seongjinIncome: document.querySelector("#seongjinIncome"),
-  sowonIncome: document.querySelector("#sowonIncome"),
-  totalExpense: document.querySelector("#totalExpense"),
-  totalSavings: document.querySelector("#totalSavings"),
-  totalVoo: document.querySelector("#totalVoo"),
-  totalStock: document.querySelector("#totalStock"),
-  totalBalance: document.querySelector("#totalBalance"),
   reportMonth: document.querySelector("#reportMonth"),
   personReports: document.querySelector("#personReports"),
+  stockList: document.querySelector("#stockList"),
+  stockListCount: document.querySelector("#stockListCount"),
   historyTable: document.querySelector("#historyTable"),
   exportBtn: document.querySelector("#exportBtn"),
   importInput: document.querySelector("#importInput"),
@@ -121,19 +116,10 @@ async function init() {
 
 function render() {
   const month = els.monthInput.value;
-  const rows = PEOPLE.map((person) => state.months[month][person]);
-  const totals = sumRows(rows);
-
-  els.seongjinIncome.textContent = won(state.months[month]["성진"].income);
-  els.sowonIncome.textContent = won(state.months[month]["소원"].income);
-  els.totalExpense.textContent = won(totals.expenseWithStock);
-  els.totalSavings.textContent = won(totals.savings);
-  els.totalVoo.textContent = won(totals.voo);
-  els.totalStock.textContent = won(totals.stock);
-  els.totalBalance.textContent = won(totals.balance);
   els.reportMonth.textContent = monthLabel(month);
 
   renderPersonReports(month);
+  renderStockList(month);
   renderHistory();
   renderPosts();
 }
@@ -153,7 +139,6 @@ function renderPersonReports(month) {
         <div class="metric"><span>적금</span><strong>${won(item.savings)}</strong></div>
         <div class="metric"><span>VOO</span><strong>${won(item.voo)}</strong></div>
         <div class="metric"><span>주식투자</span><strong>${won(item.stock)}</strong></div>
-        <div class="metric"><span>주식 종목</span><strong>${escapeHtml(item.stockMemo) || "-"}</strong></div>
         <div class="metric"><span>시드머니</span><strong>${won(item.seed)}</strong></div>
         <div class="metric"><span>지출 합계(고정비+VOO+주식)</span><strong>${won(item.expense + item.voo + item.stock)}</strong></div>
         <div class="ratio-bar" title="저축+투자율"><span style="width: ${ratio}%"></span></div>
@@ -163,6 +148,37 @@ function renderPersonReports(month) {
       </article>
     `;
   }).join("");
+}
+
+function renderStockList(month) {
+  const items = PEOPLE.flatMap((person) => {
+    const personData = state.months[month][person];
+    const names = parseStockNames(personData.stockMemo);
+
+    return names.map((name) => ({
+      person,
+      name,
+      amount: personData.stock || 0,
+    }));
+  });
+
+  els.stockListCount.textContent = `${items.length}개`;
+
+  if (items.length === 0) {
+    els.stockList.innerHTML = `<p class="empty">아직 입력된 주식 종목이 없습니다.</p>`;
+    return;
+  }
+
+  els.stockList.innerHTML = items.map((item) => `
+    <article class="stock-item">
+      <div class="stock-symbol">${escapeHtml(item.name.slice(0, 2).toUpperCase())}</div>
+      <div>
+        <strong>${escapeHtml(item.name)}</strong>
+        <span>${escapeHtml(item.person)} 투자 종목</span>
+      </div>
+      <em>${won(item.amount)}</em>
+    </article>
+  `).join("");
 }
 
 function renderHistory() {
@@ -427,6 +443,13 @@ function monthLabel(month) {
 
 function numberFrom(input) {
   return Number(input.value || 0);
+}
+
+function parseStockNames(value) {
+  return String(value || "")
+    .split(/[\n,;/]+/)
+    .map((name) => name.trim())
+    .filter(Boolean);
 }
 
 function won(value) {
