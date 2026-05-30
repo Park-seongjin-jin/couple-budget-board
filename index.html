@@ -49,18 +49,22 @@
                     <input data-person="성진" data-field="voo" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
                   </label>
                   <label>
-                    주식투자
-                    <input data-person="성진" data-field="stock" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
-                  </label>
-                  <label>
                     시드머니
                     <input data-person="성진" data-field="seed" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
                   </label>
                 </div>
-                <label>
-                  주식 종목
-                  <input data-person="성진" data-field="stockMemo" type="text" placeholder="예: AAPL, NVDA, TSLA" />
-                </label>
+                <section class="investment-editor">
+                  <div class="mini-heading">
+                    <h4>종목 투자</h4>
+                    <span>성진</span>
+                  </div>
+                  <div class="investment-inputs">
+                    <input data-invest-person="성진" data-invest-field="name" type="text" placeholder="종목명" />
+                    <input data-invest-person="성진" data-invest-field="date" type="date" />
+                    <input data-invest-person="성진" data-invest-field="amount" inputmode="numeric" type="number" min="0" step="10000" placeholder="금액" />
+                    <button type="button" data-add-investment="성진">추가</button>
+                  </div>
+                </section>
                 <label>
                   메모
                   <textarea data-person="성진" data-field="memo" rows="3" placeholder="예: 이번 달 고정비가 늘었음, 여행비 따로 계산"></textarea>
@@ -87,18 +91,22 @@
                     <input data-person="소원" data-field="voo" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
                   </label>
                   <label>
-                    주식투자
-                    <input data-person="소원" data-field="stock" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
-                  </label>
-                  <label>
                     시드머니
                     <input data-person="소원" data-field="seed" inputmode="numeric" type="number" min="0" step="10000" placeholder="0" />
                   </label>
                 </div>
-                <label>
-                  주식 종목
-                  <input data-person="소원" data-field="stockMemo" type="text" placeholder="예: AAPL, NVDA, TSLA" />
-                </label>
+                <section class="investment-editor">
+                  <div class="mini-heading">
+                    <h4>종목 투자</h4>
+                    <span>소원</span>
+                  </div>
+                  <div class="investment-inputs">
+                    <input data-invest-person="소원" data-invest-field="name" type="text" placeholder="종목명" />
+                    <input data-invest-person="소원" data-invest-field="date" type="date" />
+                    <input data-invest-person="소원" data-invest-field="amount" inputmode="numeric" type="number" min="0" step="10000" placeholder="금액" />
+                    <button type="button" data-add-investment="소원">추가</button>
+                  </div>
+                </section>
                 <label>
                   메모
                   <textarea data-person="소원" data-field="memo" rows="3" placeholder="예: 이번 달 고정비가 늘었음, 여행비 따로 계산"></textarea>
@@ -120,7 +128,7 @@
                 <h3>이번 달 종목 투자</h3>
                 <span id="stockListCount">0개</span>
               </div>
-              <div id="stockList" class="stock-list"></div>
+              <div id="stockList" class="investor-stock-lists"></div>
             </section>
           </section>
         </section>
